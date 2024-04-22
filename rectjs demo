@@ -1,0 +1,377 @@
+-Route can have collection of child routes
+
+index home page-
+import { BrowserRouter ,Routes,Route,Link} from "react-router-dom";
+import Home from "./Home";
+import Register from "./Register";
+import Login from "./Login";
+import DashBoardShopping from "./Dashboard";
+export default function IndexHome(){
+ 
+    return(
+        
+           <div className="container-fluid">
+             <header className="bg-danger text-white p-2 text-center">
+                <h2>Online shooping</h2>
+            </header>
+            <section className="row mt-2">
+                <BrowserRouter>
+                <nav className="col-2 m-2">
+                <div >
+                    <Link to="/home" className="btn btn-danger w-100 m-1">Home</Link>
+                </div>
+                <div>
+                    <Link to="/login" className="btn btn-danger w-100 m-1">Login</Link>
+                </div>
+                <div>
+                    <Link to="/register" className="btn btn-danger w-100 m-1">Register</Link>
+                </div>
+                <div>
+                    <Link to="/dashboard" className="btn btn-danger w-100 m-1">Dashboard</Link>
+                </div>
+                </nav>
+                <main className="col-9 m-2"> 
+                     <Routes>
+                        <Route path="/" element={<Home/>}></Route>
+                        <Route path="/home" element={<Home/>}></Route>
+                        <Route path="/register" element={<Register/>}></Route>
+                        <Route path="/login" element={<Login/>}></Route>
+                        <Route path="/dashboard" element={<DashBoardShopping/>}></Route>
+                        <Route path="/errorpage" element={
+                            <div>
+                                <h2>not matched</h2>
+                                <Link to="/login">try again </Link>
+                            </div>
+                        }/>
+                     </Routes>
+                </main>
+                </BrowserRouter>
+            </section>
+           </div>
+         
+    )
+}
+
+-home page
+import { Link } from "react-router-dom";
+export default function HomeElement(){
+    return(
+        <div>
+            <h2>Shopping home</h2>
+            <Link to="/register">new user</Link>
+            <span> | </span>
+            <Link to="/login">Exiting user</Link>
+        </div>
+    )
+}
+
+-register page
+import { useFormik } from "formik";
+import { useNavigate } from "react-router-dom";
+
+export default function Register(){
+    let navigate=useNavigate();
+   
+    const formik=useFormik({
+        initialValues:{
+            Userid:"",
+            UserName:"",
+            Password:"",
+            Age:0,
+            City:"",
+           Subscribed:true
+        },
+        onSubmit:values=>{
+           alert("register successful" +JSON.stringify(values) );
+           navigate("/login")
+        }
+    })
+    return(
+        <div>
+             <form onSubmit={formik.handleSubmit}>
+            <dl>
+                <dt>Userid</dt>
+                <dd><input type="text" onChange={formik.handleChange} name="Userid" value={formik.values.Userid}></input></dd>
+                <dt>UserName</dt>
+                <dd><input type="text" onChange={formik.handleChange} name="UserName" value={formik.values.UserName}></input></dd>
+                <dt>Password</dt>
+                <dd><input type="password" onChange={formik.handleChange} name="Password" value={formik.values.Password}></input></dd>
+                <dt>Age</dt>
+                <dd><input type="number" onChange={formik.handleChange} name="Age" value={formik.values.Age}></input></dd>
+                <dt>City</dt>
+                <dd>
+                    <select name="City" value={formik.values.City} onChange={formik.handleChange}>
+                        <option>Delhi</option>
+                        <option>Hyd</option>
+                    </select>
+                </dd>
+                <dt>Subscription</dt>
+                <dd className="form-switch"><input className="form-check-input" type="checkbox" name="Subscribed"></input></dd>
+            </dl>
+            <button>Register</button>
+          
+        </form>
+        </div>
+    )
+}
+
+login page
+import { useFormik } from "formik"
+import { useNavigate } from "react-router-dom"
+import { useCookies } from "react-cookie"
+
+export default function Login(){
+    const data={
+        userid:"chandan",
+        password:"chandan123"
+    }
+    let navigate=useNavigate();
+    const [cookie,setcookie,removecookie]=useCookies();
+  
+    const formik=useFormik({
+        initialValues:{
+            Userid:'',
+            Password:'',
+        },
+        onSubmit:values=>{
+          
+           console.log(values);
+           if(values.Userid==data.userid && values.Password==data.password){
+            setcookie("userid",values.Userid);
+            navigate("/dashboard");
+            
+           }else{
+              navigate("/errorpage");
+           }
+        }
+    })
+    return(
+        <div>
+           <form onSubmit={formik.handleSubmit}>
+            <dl>
+                <dt>Userid</dt>
+                <dd><input type="text" onChange={formik.handleChange} name="Userid" value={formik.values.Userid}></input></dd>
+                <dt>Password</dt>
+                <dd><input type="password" onChange={formik.handleChange} name="Password" value={formik.values.Password}></input></dd>
+            </dl>
+            <button>Login</button>
+          
+        </form>
+        </div>
+    )
+}
+
+dasboard page
+import { useCookies} from "react-cookie"
+import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+export default function DashBoardShopping(){
+    const [cookie,setcookie,removecookie]=useCookies();
+   const [usedata,setdata]=useState();
+   let navigate =useNavigate();
+   useEffect(()=>{
+    setdata(cookie["userid"])
+   })
+   function btnclick(){
+     navigate("/login");
+     removecookie("userid")
+   }
+    return(
+        <div>
+            <h2>sign in successful-{usedata}</h2>
+             <button className="btn btn-link" onClick={btnclick}>log out</button>
+        </div>
+    )
+}
+
+
+Route parameters
+-----------------
+-Parameter allow to query any content directly from url
+-Parameter is also used to transpot data from one component to another
+
+step-1 =>Configure route path that can accept parameters
+  <Route path="Name/:param1/:param2" element={}/>
+
+step= route para meter pass with actual values from url
+ url:Name/value1/value2
+Step=3
+Access route parameters using "useparams()" router hook
+   let ref=useparams()  object key and value
+   ref.param1
+   ref.param2
+
+index home
+import { BrowserRouter ,Routes,Route,Link} from "react-router-dom";
+import Home from "./Home";
+import Register from "./Register";
+import Login from "./Login";
+import DashBoardShopping from "./Dashboard";
+import Categoeryitem from "./Categoeryitem";
+import Productdetails from "./Productdetails";
+export default function IndexHome(){
+ 
+    return(
+        
+           <div className="container-fluid">
+             <header className="bg-danger text-white p-2 text-center">
+                <h2>Online shooping</h2>
+            </header>
+            <section className="row mt-2">
+                <BrowserRouter>
+                <nav className="col-2 m-2">
+                <div >
+                    <Link to="/home" className="btn btn-danger w-100 m-1">Home</Link>
+                </div>
+                <div>
+                    <Link to="/login" className="btn btn-danger w-100 m-1">Login</Link>
+                </div>
+                <div>
+                    <Link to="/register" className="btn btn-danger w-100 m-1">Register</Link>
+                </div>
+                <div>
+                    <Link to="/dashboard" className="btn btn-danger w-100 m-1">Dashboard</Link>
+                </div>
+                </nav>
+                <main className="col-9 m-2"> 
+                     <Routes>
+                        <Route path="/" element={<Home/>}></Route>
+                        <Route path="/home" element={<Home/>}></Route>
+                        <Route path="/register" element={<Register/>}></Route>
+                        <Route path="/login" element={<Login/>}></Route>
+                        <Route path="/dashboard" element={<DashBoardShopping/>}></Route>
+                        <Route path="/categoery/:categoery" element={<Categoeryitem/>}></Route>
+                        <Route path="/details/:id"  element={<Productdetails/>}/>
+                        <Route path="/errorpage" element={
+                            <div>
+                                <h2>not matched</h2>
+                                <Link to="/login">try again </Link>
+                            </div>
+                        }/>
+                     </Routes>
+                </main>
+                </BrowserRouter>
+            </section>
+           </div>
+         
+    )
+}
+
+Dashboard
+import { useCookies} from "react-cookie"
+import { useEffect, useState } from "react";
+import {  Link, useNavigate } from "react-router-dom";
+import axios, { Axios } from "axios";
+export default function DashBoardShopping(){
+    const [cookie,setcookie,removecookie]=useCookies();
+   const [usedata,setdata]=useState();
+   const [categoires,setcategoery]=useState([]);
+   let navigate =useNavigate();
+   function productscategoery(){
+     axios.get("https://fakestoreapi.com/products/categories")
+     .then(response=>{
+        setcategoery(response.data)
+     })
+   }
+   useEffect(()=>{
+    setdata(cookie["userid"]);
+    productscategoery()
+   })
+   function btnclick(){
+     navigate("/login");
+     removecookie("userid");
+   }
+    return(
+        <div>
+            <h2>sign in successful-{usedata} | <button className="btn btn-link" onClick={btnclick}>log out</button></h2>
+             <ol>
+                {
+                   categoires.map(item=>
+                  
+                      <li key={item}><Link to={"/categoery/"+item}>{item}</Link></li>
+                    )
+                }
+             </ol>
+        </div>
+    )
+}
+
+categoery item
+import { useState,useEffect } from "react"
+import { useParams } from "react-router-dom"
+import axios, { Axios } from "axios";
+import { Link } from "react-router-dom";
+export default function Categoeryitemm(){
+    const[pcategoery,setparams]=useState();
+    const[product,setproduct]=useState([]);
+    let params=useParams();
+
+    function Productsitem(){
+      axios.get("https://fakestoreapi.com/products")
+      .then(response=>{
+        setproduct(response.data)
+      })  
+    }
+    useEffect(()=>{
+        setparams(params.categoery);
+        Productsitem()
+    })
+    return(
+        <div>
+            <h2>{pcategoery}</h2>
+            <ol>
+            {
+                product.filter(item=>item.category==pcategoery).map(data=>
+                  <li key={data.id}>
+                    <img src={data.image} width="100" height="100" className="p-2"/>
+                    <Link to={"/details/"+data.id}>{data.title}</Link>
+                  </li> 
+                )
+            }
+            </ol>
+            <Link to="/dashboard">back to dashboard</Link>
+        </div>
+        
+    )
+}
+product details
+import { useState,useEffect } from "react"
+import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom"
+import axios, { Axios } from "axios";
+export default function Productdetails(){
+    const[productid,setproductid]=useState();
+    const [details,setdetails]=useState([]);
+    let params=useParams();
+    function ProductDetails(){
+        axios.get(`https://fakestoreapi.com/products/${params.id}`)
+        .then(response=>{
+           
+            setdetails(response.data)
+        })
+    }
+    useEffect(()=>{
+        setproductid(params.id);
+        ProductDetails();
+       
+    })
+    return(
+        
+       <div>
+       
+         <h2>{details.category}</h2>
+         <dl>
+            <dt>Title</dt>
+            <dd>{details.title}</dd>
+            <dt>Preview</dt>
+            <dd>
+                <img src={details.image} height="100" width="100"/>
+            </dd>
+            <dt>Price</dt>
+            <dd>{details.price}</dd>
+         </dl>
+         <Link to={"/categoery/"+details.category}>back to categoery</Link>
+       </div>
+        
+    )
+}
